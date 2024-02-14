@@ -1,0 +1,23 @@
+trigger:
+ branches:
+    include:
+      - none  #develop
+resources:
+ repositories:
+   - repository:  DotnetRepos
+     type: git
+     name: Azuredevops demo/Dotnet
+     ref:  develop
+stages: 
+  - template: dotnet-buildtemplate.yml
+    parameters:
+      BranchPath: DotnetRepos
+  - template: dotnet-releasetemplate.yml
+    parameters:
+      Environment: 'DEV'
+  - template: dotnet-releasetemplate.yml
+    parameters:
+       Environment: 'STG'
+  - template: dotnet-releasetemplate.yml
+    parameters:
+       Environment: 'PRD'

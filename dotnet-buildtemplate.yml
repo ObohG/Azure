@@ -1,0 +1,38 @@
+parameters:
+  - name: BranchPath
+    type: string
+stages: 
+  - stage: BuildStage
+    displayName: Build Stage
+    jobs:
+    - job: Job1
+      displayName: Job-1
+      steps: 
+        - checkout: ${{ parameters.BranchPath }}
+        - bash: tree $(Pipeline.Workspace)
+        - task: DotNetCoreCLI@2
+          displayName: Restore
+          inputs:
+            command: 'restore'
+            projects: '**/DreamTech.Web.csproj'
+            feedsToUse: 'select'
+        - task: DotNetCoreCLI@2
+          displayName: Build
+          inputs:
+            command: 'build'
+            projects: '**/DreamTech.Web.csproj'
+            arguments: '--configuration Release'
+        - task: DotNetCoreCLI@2
+          displayName: Publish
+          inputs:
+            command: 'publish'
+            publishWebProjects: true
+            arguments: '--configuration release --output $(build.artifactstagingdirectory)'
+        # Dotnet Build step
+        - bash: tree $(Pipeline.Workspace)
+        - task: PublishBuildArtifacts@1
+          inputs:
+            PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+            ArtifactName: 'dotnet-Artifact'
+            publishLocation: 'Container'
+    

@@ -1,0 +1,24 @@
+parameters: 
+- name: Environment
+  type: string
+stages: 
+  - stage: ${{ parameters.Environment }}RelaseStage
+    displayName: ${{ parameters.Environment }} Release Stage
+    dependsOn: BuildStage
+    variables:
+    - group: dotnet-${{ parameters.Environment }}-vg
+    jobs:
+      - deployment:  ${{ parameters.Environment }}_ReleaseJob
+        environment: ${{ parameters.Environment }}
+        strategy:
+         runOnce:
+            deploy:
+               steps:
+                 - bash: tree $(Pipeline.Workspace)
+                 - task: AzureRmWebAppDeployment@4
+                   inputs:
+                     ConnectionType: 'AzureRM'
+                     azureSubscription: 'az-devops-demo-${{ parameters.Environment }}-sc'
+                     appType: 'webApp'
+                     WebAppName: '$(AppServiceName)'
+                     packageForLinux: '$(Pipeline.WorkSpace)/dotnet-Artifact/DreamTech.Web.zip'
